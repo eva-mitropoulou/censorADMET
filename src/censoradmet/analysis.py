@@ -127,10 +127,14 @@ def comparison_table(agg, metric, treatments, baseline, split_kind=None):
 # --------------------------------------------------------------------------- #
 # Mixed-effects hierarchical model (plan §17)                                 #
 # --------------------------------------------------------------------------- #
-def mixed_effects(df, metric, treatments=None, split_kind=None):
-    """metric ~ C(treatment) + (1|endpoint) via statsmodels MixedLM, on the
-    per-cell data (folds/seeds as replicates within the endpoint random effect).
-    Returns a summary dict of fixed-effect coefficients vs the reference treatment."""
+def mixed_effects(df, metric, treatments=None, split_kind=None, baseline="exact_only"):
+    """Paired-cell delta ~ 1 + (1|endpoint) mixed-model cross-check.
+
+    Each candidate is first paired with the baseline within the same endpoint,
+    fold, seed and feature set.  This preserves matched treatment comparisons
+    instead of treating co-evaluated treatments as independent cell values.
+    Endpoint-level Wilcoxon tests remain the primary inferential analysis.
+    """
     import statsmodels.formula.api as smf
 
     d = df.copy()
@@ -138,21 +142,39 @@ def mixed_effects(df, metric, treatments=None, split_kind=None):
         d = d[d["split_kind"] == split_kind]
     if treatments is not None:
         d = d[d["treatment_label"].isin(treatments)]
-    d = d[["endpoint", "treatment_label", metric]].dropna()
-    if d["endpoint"].nunique() < 3 or len(d) < 20:
+    key_cols = [c for c in ["endpoint", "fold", "seed", "feature_set"] if c in d.columns]
+    d = d[key_cols + ["treatment_label", metric]].dropna()
+    if baseline not in set(d["treatment_label"]) or d["endpoint"].nunique() < 3:
         return {"note": "insufficient data for mixed model", "n": int(len(d))}
-    d = d.rename(columns={metric: "y", "treatment_label": "trt"})
-    try:
-        md = smf.mixedlm("y ~ C(trt)", d, groups=d["endpoint"])
-        mf = md.fit(method="lbfgs", maxiter=200, disp=False)
-    except Exception as e:
-        return {"note": f"mixed model failed: {e}"}
+
+    candidates = sorted(set(d["treatment_label"]) - {baseline})
+    comparisons = {}
+    for candidate in candidates:
+        pair = d[d["treatment_label"].isin([baseline, candidate])]
+        pair = pair.pivot_table(
+            index=key_cols, columns="treatment_label", values=metric, aggfunc="mean"
+        ).dropna(subset=[baseline, candidate]).reset_index()
+        if pair["endpoint"].nunique() < 3 or len(pair) < 6:
+            comparisons[candidate] = {"note": "insufficient paired cells", "n": int(len(pair))}
+            continue
+        pair["delta"] = pair[candidate] - pair[baseline]
+        try:
+            md = smf.mixedlm("delta ~ 1", pair, groups=pair["endpoint"])
+            mf = md.fit(method="lbfgs", maxiter=200, disp=False)
+            comparisons[candidate] = {
+                "n_paired_cells": int(len(pair)),
+                "n_endpoints": int(pair["endpoint"].nunique()),
+                "mean_delta": float(pair["delta"].mean()),
+                "intercept": float(mf.params["Intercept"]),
+                "p_value": float(mf.pvalues["Intercept"]),
+                "group_var": float(mf.cov_re.iloc[0, 0]) if mf.cov_re.size else None,
+            }
+        except Exception as e:
+            comparisons[candidate] = {"note": f"mixed model failed: {e}", "n": int(len(pair))}
+
     out = {"metric": metric, "split_kind": split_kind or "all",
-           "n_obs": int(len(d)), "n_endpoints": int(d["endpoint"].nunique()),
-           "group_var": float(mf.cov_re.iloc[0, 0]) if mf.cov_re.size else None,
-           "fixed_effects": {}}
-    for name, coef, p in zip(mf.params.index, mf.params.values, mf.pvalues.values):
-        out["fixed_effects"][str(name)] = {"coef": float(coef), "p_value": float(p)}
+           "baseline": baseline, "pairing_keys": key_cols,
+           "comparisons": comparisons}
     return out
 
 
