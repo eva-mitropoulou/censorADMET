@@ -4,4 +4,6 @@
 
 The data are derived from [ChEMBL 36](https://www.ebi.ac.uk/chembl/), which must be cited when the benchmark input is reused. The source database and all original metadata remain attributable to the ChEMBL team. This repository distributes only the curated research input required to audit the accompanying analyses.
 
+`measurement_records.parquet` is an adaptation of ChEMBL data and is released under the [CC BY-SA 3.0 Unported license](../LICENSE_DATA), not the code license. Reusers must preserve the ChEMBL attribution and distribute adaptations under the same license. See [ATTRIBUTION.md](../ATTRIBUTION.md).
+
 The data package is not a claim of assay harmonization or experimental ground truth. Censoring thresholds are assay-specific and the released labels should be interpreted as reported inequalities on the documented transformed scale.

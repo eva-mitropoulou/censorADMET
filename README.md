@@ -67,6 +67,6 @@ Please cite the accompanying ChemRxiv preprint:
 
 The stable ChemRxiv identifier will be added to [CITATION.cff](CITATION.cff) on publication.
 
-## License
+## Licenses And Attribution
 
-Code is released under the [MIT License](LICENSE). The included benchmark input is derived from ChEMBL 36; see [data/README.md](data/README.md) for attribution and data-use details.
+The code is released under the [MIT License](LICENSE_CODE). The curated benchmark input is a ChEMBL 36-derived adaptation and is released separately under [CC BY-SA 3.0](LICENSE_DATA), consistent with ChEMBL's data license. See [ATTRIBUTION.md](ATTRIBUTION.md) and [data/README.md](data/README.md) for required attribution and reuse terms.
