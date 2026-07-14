@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use CensorADMET, please cite the accompanying ChemRxiv preprint."
+title: "CensorADMET: Constraint-Satisficing Regression for Censored ADMET Prediction with a Controllable Accuracy-versus-Consistency Trade-off"
+authors:
+  - family-names: Mitropoulou
+    given-names: Evangelia
+  - family-names: Giannopoulos
+    given-names: Dimitris
+date-released: 2026-07-14
+license: MIT
+preferred-citation:
+  type: article
+  title: "CensorADMET: Constraint-Satisficing Regression for Censored ADMET Prediction with a Controllable Accuracy-versus-Consistency Trade-off"
+  authors:
+    - family-names: Mitropoulou
+      given-names: Evangelia
+    - family-names: Giannopoulos
+      given-names: Dimitris
+  journal: ChemRxiv
+  year: 2026
+  notes: "Preprint. The persistent ChemRxiv identifier will be added when assigned."

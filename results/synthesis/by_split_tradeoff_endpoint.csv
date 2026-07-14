@@ -1,0 +1,17 @@
+split_kind,treatment_label,acc_mae,viol_violation_rate,dec_false_safe_rate,cov90
+random,aft_conc,0.488,0.403,0.403,0.774
+random,ensemble_satisficing@0.05,0.544,0.406,0.337,0.41
+random,exact_only,0.542,0.664,0.291,0.274
+random,satisficing@0.02,0.564,0.379,0.348,0.298
+random,satisficing@0.05,0.555,0.404,0.345,0.31
+random,satisficing@0.10,0.556,0.451,0.322,0.334
+random,satisficing@0.20,0.554,0.523,0.313,0.366
+random,tobit,0.636,0.286,0.375,0.267
+scaffold,aft_conc,0.546,0.443,0.472,0.731
+scaffold,ensemble_satisficing@0.05,0.644,0.428,0.407,0.357
+scaffold,exact_only,0.634,0.634,0.357,0.231
+scaffold,satisficing@0.02,0.662,0.41,0.418,0.254
+scaffold,satisficing@0.05,0.655,0.427,0.412,0.265
+scaffold,satisficing@0.10,0.659,0.448,0.396,0.27
+scaffold,satisficing@0.20,0.655,0.515,0.377,0.336
+scaffold,tobit,0.77,0.301,0.467,0.211

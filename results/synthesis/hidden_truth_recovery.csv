@@ -1,0 +1,9 @@
+mode,treatment,mean,std,count
+informative,aft_conc,0.426,0.114,24
+informative,exact_only,0.608,0.165,24
+informative,satisficing,0.702,0.355,24
+informative,tobit,0.59,0.157,24
+natural,aft_conc,0.505,0.062,24
+natural,exact_only,0.634,0.143,24
+natural,satisficing,0.68,0.39,24
+natural,tobit,0.585,0.127,24

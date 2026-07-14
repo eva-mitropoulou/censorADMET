@@ -1,0 +1,4 @@
+treatment,mae,violation
+exact_only,0.517,0.898
+satisficing,0.634,0.782
+tobit,2.261,0.334
