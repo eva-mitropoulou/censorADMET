@@ -71,6 +71,20 @@ def build_checks():
         checks.append((f"feas frac {eps}", float((s.max_excess <= 1e-3).mean()), frac))
         checks.append((f"feas median-excess {eps}", float(s.max_excess.median()), med))
 
+    # Complete primary-epsilon audit: endpoint/split is the analysis unit.
+    primary = pd.read_csv(RES / "synthesis" / "primary_feasibility_summary.csv")
+    all_primary = primary[primary.split_kind == "all"].iloc[0]
+    for column, value in [
+        ("constraint_G_left", 0.048),
+        ("constraint_G_right", 0.035),
+        ("fraction_strictly_feasible", 0.483),
+        ("constraint_fraction_q_ge_tau", 0.655),
+        ("constraint_mean_probability_shortfall", 0.093),
+        ("median_max_constraint_excess", 0.006),
+        ("max_max_constraint_excess", 0.030),
+    ]:
+        checks.append((f"primary feasibility {column}", float(all_primary[column]), value))
+
     # weighted-Tobit vs satisficing curve (measurement/random, mean over endpoints)
     mm = pd.read_parquet(RES / "matrix_measurement" / "all_results.parquet")
     mm = mm[mm.get("error").isna()] if "error" in mm.columns else mm

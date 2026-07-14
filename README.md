@@ -20,6 +20,7 @@ The frozen result artifacts cover eight CYP, hERG, and ABCB1 measurement-level e
 | Primary satisficing exact-label MAE cost | <= 0.04 transformed-scale units median |
 | Plain Tobit bound-consistency gain | Larger, with substantially higher exact-label MAE in matched comparisons |
 | Anchored weighted-Tobit comparison | Does not reach the stricter satisficing violation regime; no uniform MAE dominance where curves overlap |
+| Complete feasibility audit | 37 endpoint/split units, 370 valid fold-and-seed cells; aggregate budget targeting is reported rather than claimed as per-run enforcement |
 | Split-conformal coverage | 0.79--0.90, with broad intervals under shift |
 
 `figures/` contains the two core operating-curve and endpoint-effect plots. `results/` contains the tidy per-run matrices and compact summaries used for the reported analyses.
