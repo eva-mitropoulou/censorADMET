@@ -25,7 +25,6 @@ from dataclasses import replace
 
 import numpy as np
 
-from assay_context import ContextEncoder
 from baselines import DeepEnsemble, MLPTobit, XGBoostAFTConcentration
 from heads import HeteroscedasticMLP
 from metrics import (
@@ -89,25 +88,8 @@ def run_cell(ds, split_name, train_idx, test_idx, treatment, seed=0,
                 n_train=int(len(train_idx)), n_test=int(len(test_idx)), threshold=t_e)
 
     try:
-        # ---------------- feature + assay setup ----------------
-        # satisficing_assay concatenates context into X; satisficing_transfer keeps
-        # the context/description embedding SEPARATE (fed to the amortized offset).
-        use_ctx = treatment == "satisficing_assay"
-        X, enc = _build_features(ds, train_idx, use_context=use_ctx)
-        n_assays = 0
-        assay_idx = None
-        assay_embed = None
-        if treatment in ("satisficing_assay", "satisficing_transfer") and ds.granularity == "measurement":
-            from data import fit_assay_vocab
-            fit_assay_vocab(ds, train_idx, min_count=2)
-            n_assays = max(1, len(ds.assay_vocab) + 1)
-            assay_idx = ds.assay_idx()
-            if treatment == "satisficing_transfer":
-                # per-row assay embedding = train-fit context encoder output
-                # (assay type/source/relation + numeric + description SVD).
-                from assay_context import ContextEncoder
-                tenc = ContextEncoder(text_dim=16).fit(ds.meta, train_idx)
-                assay_embed = tenc.transform(ds.meta)
+        # ---------------- feature setup ----------------
+        X, enc = _build_features(ds, train_idx, use_context=False)
 
         cfg = TrainConfig(tau=tau, nu=anchor_weight, epochs=epochs, batch_size=1024, lr=1e-3,
                           seed=seed, device=device)
@@ -155,34 +137,6 @@ def run_cell(ds, split_name, train_idx, test_idx, treatment, seed=0,
                 return {**scored, **_constraint_diagnostics(
                     tr, specs, X[train_idx], lo[train_idx], hi[train_idx], ex[train_idx], tau
                 )}
-
-        elif treatment == "satisficing_assay":
-            anchor = _get_anchor(ds, X, lo, hi, ex, train_idx, dist, cfg, split_name, seed, anchor_cache)
-            specs = default_direction_constraints(lo[train_idx], hi[train_idx], ex[train_idx], eps=eps)
-            model = _make_mlp(X.shape[1], n_assays=n_assays)()
-            tr = SatisficingTrainer(model, dist, cfg)
-            ai_tr = assay_idx[train_idx] if assay_idx is not None else None
-            tr.fit(X[train_idx], lo[train_idx], hi[train_idx], ex[train_idx], specs,
-                   anchor_mu=anchor, assay_idx=ai_tr)
-            # at test time unknown assays -> idx 0 (no offset)
-            ai_te = assay_idx[test_idx] if assay_idx is not None else None
-            pred = tr.predict(X[test_idx], assay_idx=ai_te)
-
-        elif treatment == "satisficing_transfer":
-            if assay_embed is None:
-                return {**base, "error": "satisficing_transfer requires measurement granularity"}
-            from heads import AssayTransferMLP
-            anchor = _get_anchor(ds, X, lo, hi, ex, train_idx, dist, cfg, split_name, seed, anchor_cache)
-            specs = default_direction_constraints(lo[train_idx], hi[train_idx], ex[train_idx], eps=eps)
-            model = AssayTransferMLP(X.shape[1], assay_embed_dim=assay_embed.shape[1],
-                                     hidden=(256, 128), n_assays=n_assays, use_residual=True)
-            tr = SatisficingTrainer(model, dist, replace(cfg, weight_decay=1e-4))
-            ai_tr = assay_idx[train_idx]; ae_tr = assay_embed[train_idx]
-            tr.fit(X[train_idx], lo[train_idx], hi[train_idx], ex[train_idx], specs,
-                   anchor_mu=anchor, assay_idx=ai_tr, assay_embed=ae_tr)
-            # unseen assays -> idx 0 (no residual) BUT amortized embedding offset still applies
-            pred = tr.predict(X[test_idx], assay_idx=assay_idx[test_idx],
-                              assay_embed=assay_embed[test_idx])
 
         elif treatment == "aft_conc":
             # carve a validation slice from train for early stopping

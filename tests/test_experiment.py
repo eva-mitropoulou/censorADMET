@@ -53,8 +53,7 @@ def test_all_treatments_run_and_score():
     from experiment import run_cell
     ds = _DS(granularity="measurement")
     tr, te = _split(ds)
-    for treatment in ["exact_only", "tobit", "satisficing", "satisficing_assay",
-                      "satisficing_transfer", "aft_conc", "ensemble_satisficing"]:
+    for treatment in ["exact_only", "tobit", "satisficing", "aft_conc", "ensemble_satisficing"]:
         r = run_cell(ds, "random", tr, te, treatment, seed=0, eps=0.05,
                      epochs=20, ensemble_k=2, n_jobs=2)
         assert "error" not in r, f"{treatment} errored: {r.get('error')}\n{r.get('traceback','')}"

@@ -33,8 +33,6 @@ import pandas as pd
 
 TREATMENTS_BASE = ["exact_only", "tobit", "aft_conc"]
 TREATMENTS_SATIS = ["satisficing", "ensemble_satisficing"]  # per-eps
-# measurement-only, per-eps: lookup random effect + amortized description transfer
-TREATMENTS_ASSAY = ["satisficing_assay", "satisficing_transfer"]
 
 
 def _cell_tag(spec):
@@ -113,10 +111,6 @@ def build_specs(args):
                     # ensemble at its (smaller) eps set
                     for eps in ens_eps:
                         specs.append(_spec(args, endpoint, split_kind, fold, "ensemble_satisficing", eps, seed))
-                    if args.granularity in ("measurement", "admet"):
-                        for tr in TREATMENTS_ASSAY:
-                            for eps in args.eps:
-                                specs.append(_spec(args, endpoint, split_kind, fold, tr, eps, seed))
                     # weighted-Tobit baseline: sweep the censored-row weight (passed
                     # via the eps field, reused as the weight w in experiment.py).
                     for w in args.weighted_tobit_weights:
