@@ -148,18 +148,24 @@ def build_checks():
         checks.append((f"conformal width {split}", float(cc.loc[split, "conformal_width"]), conf_width))
         checks.append((f"conformal raw score {split}", float(cc.loc[split, "raw_interval_score"]), raw_score))
         checks.append((f"conformal score {split}", float(cc.loc[split, "conformal_interval_score"]), conf_score))
+    for split, median_width in [("random", 3.483), ("scaffold", 3.269), ("assay", 3.275)]:
+        checks.append((f"conformal median width {split}", float(cc.loc[split, "conformal_median_width"]), median_width))
+
+    sample_audit = pd.read_csv(RES / "synthesis" / "conformal_sample_audit.csv")
+    for split, n_calibration_exact in [("random", 644.9625), ("scaffold", 645.3), ("assay", 644.275)]:
+        value = float(sample_audit.loc[sample_audit["split"] == split, "n_calibration_exact"].mean())
+        checks.append((f"conformal exact calibration rows {split}", value, n_calibration_exact))
 
     # D-MPNN table (scaffold, satisficing@0.02)
     dm = pd.concat([pd.read_csv(p) for p in (RES / "dmpnn").glob("*.csv")])
-    for ep, col, eps, val in [("CYP2C9_IC50_A", "mae", None, 0.49), ("CYP2C9_IC50_A", "mae", 0.0, None)]:
-        pass  # dmpnn spot-checked below
     def dmpnn(ep, trt, eps=None, metric="mae"):
         s = dm[(dm.endpoint == ep) & (dm.split == "scaffold") & (dm.treatment == trt)]
         if eps is not None:
             s = s[np.isclose(s.eps, eps)]
         return float(s[metric].mean()) if len(s) else None
     checks.append(("dmpnn CYP2C9 exact MAE", dmpnn("CYP2C9_IC50_A", "exact_only"), 0.49))
-    checks.append(("dmpnn CYP2C9 tobit MAE", dmpnn("CYP2C9_IC50_A", "tobit"), 3.41))
+    audit = pd.read_csv(RES / "dmpnn_tobit_audit" / "cyp2c9_strict_deficit_per_seed.csv")
+    checks.append(("dmpnn CYP2C9 strict-deficit MAE", float(audit["mae"].mean()), 2.86))
 
     return checks
 

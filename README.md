@@ -19,9 +19,9 @@ The frozen result artifacts cover eight CYP, hERG, and ABCB1 measurement-level e
 | Primary satisficing violation reduction versus exact-only | 0.15--0.29 median endpoint-level reduction |
 | Primary satisficing exact-label MAE cost | <= 0.04 transformed-scale units median |
 | Plain Tobit bound-consistency gain | Larger, with substantially higher exact-label MAE in matched comparisons |
-| Anchored weighted-Tobit comparison | Does not reach the stricter satisficing violation regime; no uniform MAE dominance where curves overlap |
-| Complete feasibility audit | 37 endpoint/split units, 370 valid fold-and-seed cells; aggregate budget targeting is reported rather than claimed as per-run enforcement |
-| Split-conformal coverage | 0.79--0.90, with broad intervals under shift |
+| Matched soft-deficit comparator | Similar operating points can be obtained with a scalar penalty; the distinct contribution is direct deficit-budget control |
+| Complete feasibility audit | 40 endpoint/split assignments and 370 fold-and-seed cells; aggregate budget targeting is reported rather than claimed as per-run enforcement |
+| Split-conformal intervals | Coverage 0.79--0.90; mean widths 3.59--4.83 and median widths 3.27--3.48 transformed-scale units |
 
 `figures/` contains the two core operating-curve and endpoint-effect plots. `results/` contains the tidy per-run matrices and compact summaries used for the reported analyses.
 
@@ -57,13 +57,13 @@ make test
 make verify
 ```
 
-`make verify` recomputes representative manuscript values from the released result files. Full experiment drivers are in `scripts/`; they use the fixed data, split generator, seeds, and hyperparameters distributed here.
+`make verify` recomputes representative manuscript values from the released result files. The conformal audit uses exact calibration rows only and records the fixed calibration/test sample sizes for every endpoint, split, fold, and seed. Full experiment drivers are in `scripts/`; they use the fixed data, split generator, seeds, and hyperparameters distributed here.
 
 ## Citation
 
-Please cite the accompanying ChemRxiv preprint:
+Please cite the accompanying ChemRxiv publication:
 
-> Mitropoulou, E.; Giannopoulos, D. *CensorADMET: Constraint-Satisficing Regression for Censored ADMET Prediction with a Controllable Accuracy-versus-Consistency Trade-off.* ChemRxiv, 2026, preprint.
+> Mitropoulou, E.; Giannopoulos, D. *CensorADMET: Constraint-Satisficing Regression for Censored ADMET Prediction with a Controllable Accuracy-versus-Consistency Trade-off.* ChemRxiv, 2026.
 
 The stable ChemRxiv identifier will be added to [CITATION.cff](CITATION.cff) on publication.
 

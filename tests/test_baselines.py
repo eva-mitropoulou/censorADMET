@@ -6,6 +6,7 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from baselines import (  # noqa: E402
+    MLPSoftSatisficing,
     XGBoostAFTConcentration,
     conc_to_p,
     p_bounds_to_conc_bounds,
@@ -95,3 +96,27 @@ def test_ensemble_mixture_total_variance():
     # row0: within-var 1, between-var = var([5,7])=1 => sigma=sqrt(2)
     assert np.isclose(sigma[0], np.sqrt(2.0))
     assert np.isclose(sigma[1], 1.0)
+
+
+def test_soft_satisficing_produces_finite_predictions():
+    import torch
+
+    from heads import HeteroscedasticMLP
+    from satisficing_losses import LatentDistribution
+
+    rng = np.random.default_rng(7)
+    X = rng.normal(size=(32, 8)).astype(np.float32)
+    y = rng.normal(loc=6.0, scale=0.3, size=32).astype(np.float32)
+    lo, hi = y.copy(), y.copy()
+    # Include both one-sided censoring directions in the soft-deficit objective.
+    lo[:6], hi[:6] = 6.1, np.inf
+    lo[6:12], hi[6:12] = -np.inf, 5.9
+    exact = np.isfinite(lo) & np.isfinite(hi) & np.isclose(lo, hi)
+    model = MLPSoftSatisficing(
+        lambda: HeteroscedasticMLP(8, hidden=(8, 4)), LatentDistribution("gaussian"),
+        lambda_=1.0, epochs=2, batch_size=32, seed=7,
+    ).fit(X, lo, hi, exact, anchor_mu=np.full(32, 6.0, dtype=np.float32))
+    mu, sigma = model.predict_dist(X)
+    assert np.isfinite(mu).all()
+    assert np.isfinite(sigma).all()
+    assert np.all(sigma > 0)

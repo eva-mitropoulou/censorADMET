@@ -6,9 +6,10 @@ produces one row of metrics. Treatments span the comparison axis:
   T0  exact-only          : ignore censored rows entirely (accuracy ceiling / violation floor)
   T1  tobit                : full interval likelihood (the "censor-aware" prior art)
   T2  satisficing@eps      : our method at a given violation budget (per eps)
-  T3  satisficing+assay    : + per-assay random effects and context features
-  T4  aft_conc             : concentration-space XGBoost-AFT competitor
-  T5  ensemble_satisficing  : deep ensemble of the satisficing head (UQ arm)
+  T3  weighted_tobit       : scalar-weighted interval likelihood comparator
+  T4  soft_satisficing     : same-deficit scalar-penalty comparator
+  T5  aft_conc             : concentration-space XGBoost-AFT competitor
+  T6  ensemble_satisficing : deep ensemble of the satisficing head (UQ arm)
 
 Backbones: "ecfp_mlp" (Morgan -> heteroscedastic MLP) is the default; the AFT
 treatment uses XGBoost on the same features. (A Chemprop D-MPNN backbone hook is
@@ -25,7 +26,7 @@ from dataclasses import replace
 
 import numpy as np
 
-from baselines import DeepEnsemble, MLPTobit, XGBoostAFTConcentration
+from baselines import DeepEnsemble, MLPSoftSatisficing, MLPTobit, XGBoostAFTConcentration
 from heads import HeteroscedasticMLP
 from metrics import (
     accuracy_metrics,
@@ -122,6 +123,18 @@ def run_cell(ds, split_name, train_idx, test_idx, treatment, seed=0,
                                  split_name, seed, anchor_cache)
             m = MLPTobit(_make_mlp(X.shape[1]), dist, epochs=epochs, seed=seed,
                          device=device, censored_weight=eps, anchor_weight=anchor_weight)
+            m.fit(X[train_idx], lo[train_idx], hi[train_idx], ex[train_idx], anchor_mu=anchor)
+            pred = m.predict_dist(X[test_idx])
+
+        elif treatment == "soft_satisficing":
+            # Holds the exact loss, anchor, predictive family, and direction-wise
+            # deficit fixed; only the constrained formulation becomes a penalty.
+            anchor = _get_anchor(ds, X, lo, hi, ex, train_idx, dist, cfg,
+                                 split_name, seed, anchor_cache)
+            m = MLPSoftSatisficing(
+                _make_mlp(X.shape[1]), dist, lambda_=eps, anchor_weight=anchor_weight,
+                tau=tau, epochs=epochs, seed=seed, device=device,
+            )
             m.fit(X[train_idx], lo[train_idx], hi[train_idx], ex[train_idx], anchor_mu=anchor)
             pred = m.predict_dist(X[test_idx])
 

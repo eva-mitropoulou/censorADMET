@@ -225,6 +225,99 @@ class MLPTobit:
 
 
 # --------------------------------------------------------------------------- #
+# Soft probability-deficit comparator                                         #
+# --------------------------------------------------------------------------- #
+class MLPSoftSatisficing:
+    """Exact-label regression with a scalar penalty on the satisficing deficit.
+
+    This comparator holds the exact-label likelihood, minimal-deviation anchor,
+    latent distribution, and per-direction probability deficit fixed relative to
+    ``SatisficingTrainer``. It differs only by replacing the augmented-
+    Lagrangian constraints with ``lambda_ * sum_k G_k``.
+    """
+
+    def __init__(self, make_model, dist, lambda_=1.0, anchor_weight=1.0,
+                 tau=0.85, lr=1e-3, weight_decay=1e-5, epochs=120,
+                 batch_size=1024, grad_clip=5.0, seed=0, device="cpu"):
+        self.make_model = make_model
+        self.dist = dist
+        self.lambda_ = float(lambda_)
+        self.anchor_weight = float(anchor_weight)
+        self.tau = float(tau)
+        self.lr = lr
+        self.weight_decay = weight_decay
+        self.epochs = epochs
+        self.batch_size = batch_size
+        self.grad_clip = grad_clip
+        self.seed = seed
+        self.device = device
+        self.model = None
+
+    def fit(self, X, lower, upper, exact_mask, anchor_mu=None):
+        import torch
+
+        from satisficing_losses import exact_nll, satisficing_deficit
+
+        torch.manual_seed(self.seed)
+        device = torch.device(self.device)
+        self.model = self.make_model().to(device)
+        features = torch.as_tensor(np.asarray(X, np.float32), device=device)
+        lo = torch.as_tensor(np.asarray(lower, np.float32), device=device)
+        hi = torch.as_tensor(np.asarray(upper, np.float32), device=device)
+        exact_mask = torch.as_tensor(np.asarray(exact_mask, bool), device=device)
+        anchor = None if anchor_mu is None else torch.as_tensor(
+            np.asarray(anchor_mu, np.float32), device=device
+        )
+        masks = [
+            torch.isfinite(lo) & torch.isposinf(hi),
+            torch.isneginf(lo) & torch.isfinite(hi),
+            torch.isfinite(lo) & torch.isfinite(hi) & (~exact_mask),
+        ]
+        masks = [(mask, int(mask.sum().item())) for mask in masks if bool(mask.any())]
+        optimiser = torch.optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+        generator = torch.Generator().manual_seed(self.seed)
+        n_rows = features.shape[0]
+        for _ in range(self.epochs):
+            self.model.train()
+            permutation = torch.randperm(n_rows, generator=generator)
+            for start in range(0, n_rows, self.batch_size):
+                idx = permutation[start:start + self.batch_size]
+                optimiser.zero_grad()
+                mu, sigma = self.model(features[idx])
+                if bool(exact_mask[idx].any()):
+                    exact = exact_nll(mu[exact_mask[idx]], sigma[exact_mask[idx]],
+                                      lo[idx][exact_mask[idx]], self.dist).mean()
+                else:
+                    exact = mu.new_zeros(())
+                anchored = (
+                    ((mu - anchor[idx]) ** 2).mean()
+                    if anchor is not None and self.anchor_weight else mu.new_zeros(())
+                )
+                deficits = satisficing_deficit(mu, sigma, lo[idx], hi[idx], self.dist, self.tau,
+                                                exact_mask=exact_mask[idx])
+                soft = mu.new_zeros(())
+                scale = n_rows / len(idx)
+                for mask, count in masks:
+                    local = mask[idx]
+                    if bool(local.any()):
+                        soft = soft + scale * deficits[local].sum() / count
+                loss = exact + self.anchor_weight * anchored + self.lambda_ * soft
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.grad_clip)
+                optimiser.step()
+        return self
+
+    def predict_dist(self, X):
+        import torch
+
+        self.model.eval()
+        device = torch.device(self.device)
+        with torch.no_grad():
+            mu, sigma = self.model(torch.as_tensor(np.asarray(X, np.float32), device=device))
+        return mu.cpu().numpy(), sigma.cpu().numpy()
+
+
+# --------------------------------------------------------------------------- #
 # Deep ensemble (mixture predictive)                                          #
 # --------------------------------------------------------------------------- #
 class DeepEnsemble:
