@@ -176,12 +176,7 @@ class SatisficingTrainer:
         return torch.as_tensor(np.asarray(a), dtype=dtype, device=device)
 
     def _call_model(self, xb, ai=None, ae=None):
-        """Route arguments to the model by its type. AssayTransferMLP takes a
-        per-row assay EMBEDDING (and optional residual index); HeteroscedasticMLP
-        takes just the assay index."""
-        from heads import AssayTransferMLP
-        if isinstance(self.model, AssayTransferMLP):
-            return self.model(xb, assay_embed=ae, assay_idx=ai)
+        """Evaluate the heteroscedastic prediction head."""
         return self.model(xb, ai)
 
     def fit(
@@ -203,7 +198,7 @@ class SatisficingTrainer:
         constraints : list of ConstraintSpec over the n rows.
         anchor_mu   : (n,) reference-model predictions mu0 (None -> no anchor).
         assay_idx   : (n,) long assay indices (0 = unknown), or None.
-        assay_embed : (n, d_e) per-row assay embeddings for AssayTransferMLP, or None.
+        assay_embed : retained for API compatibility; unused by the public model.
         """
         cfg = self.cfg
         dev = self.device
@@ -403,8 +398,7 @@ class SatisficingTrainer:
 
     @torch.no_grad()
     def predict(self, X, assay_idx=None, assay_embed=None):
-        """Return (mu, sigma) as numpy arrays. Unknown assays -> idx 0 (no residual);
-        AssayTransferMLP still applies the amortized embedding offset."""
+        """Return the predicted location and scale as NumPy arrays."""
         mu, sigma = self._predict_dist(X, assay_idx, assay_embed)
         return mu.cpu().numpy(), sigma.cpu().numpy()
 

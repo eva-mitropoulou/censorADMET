@@ -1,9 +1,9 @@
-"""Result aggregation + hierarchical statistics (plan §13, §17).
+"""Result aggregation and endpoint-level statistics.
 
 Consumes the tidy all_results.parquet emitted by run_matrix.py and produces the
 paper's headline comparisons with HONEST, non-pseudoreplicated inference.
 
-Key statistical discipline (fixing the sin the v1 paper's review caught):
+Key statistical discipline:
   * The inference unit is the ENDPOINT (or endpoint x split-kind), NOT the
     individual (endpoint, fold, seed) cell. Folds and seeds are correlated
     replicates within an endpoint; treating them as independent inflates n and
@@ -39,7 +39,7 @@ METRIC_COLS = [
 def _treatment_label(row):
     """Distinguish eps-swept treatments by their eps in the label."""
     t = row["treatment"]
-    if t in ("satisficing", "satisficing_assay", "satisficing_transfer", "ensemble_satisficing"):
+    if t in ("satisficing", "ensemble_satisficing"):
         return f"{t}@{row['eps']:.2f}"
     return t
 

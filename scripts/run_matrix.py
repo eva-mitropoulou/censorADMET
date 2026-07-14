@@ -12,8 +12,7 @@ Usage:
 
 Endpoints are the CensorADMET-v1 curated endpoints (granularity=endpoint) or
 target_key:standard_type[:assay_type] triples for measurement-level runs
-(granularity=measurement), which unlock assay-aware treatments + assay/document/
-source splits.
+(granularity=measurement), including assay, document, and source splits.
 """
 from __future__ import annotations
 
@@ -26,7 +25,7 @@ import traceback
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src" / "censoradmet"))
 
 import numpy as np
 import pandas as pd
@@ -105,7 +104,7 @@ def build_specs(args):
                     # eps-free treatments
                     for tr in TREATMENTS_BASE:
                         specs.append(_spec(args, endpoint, split_kind, fold, tr, 0.0, seed))
-                    # satisficing sweeps the full eps grid (the Pareto frontier)
+                    # Satisficing sweeps the full budget grid.
                     for eps in args.eps:
                         specs.append(_spec(args, endpoint, split_kind, fold, "satisficing", eps, seed))
                     # ensemble at its (smaller) eps set

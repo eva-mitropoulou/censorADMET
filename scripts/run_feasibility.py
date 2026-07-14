@@ -1,4 +1,4 @@
-"""Constraint-feasibility diagnostics (reviewer #6).
+"""Constraint-feasibility diagnostics.
 
 For each (endpoint, split, eps) the satisficing trainer records a per-epoch
 history of the full-data per-direction deficits G_k and dual multipliers lambda_k.
@@ -14,7 +14,7 @@ import argparse
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src" / "censoradmet"))
 
 import numpy as np
 import pandas as pd

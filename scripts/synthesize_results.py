@@ -1,5 +1,4 @@
-"""Top-level synthesis of ALL result sources into the paper's headline findings
-and the §18 predefined success-criteria scorecard.
+"""Synthesize frozen result sources into manuscript-ready summaries.
 
 Consumes (whatever exists):
   results/matrix_endpoint/all_results.parquet
@@ -12,7 +11,6 @@ Emits results/synthesis/:
   - success_criteria.json     : §18 pass/fail on prespecified criteria
   - headline_findings.md      : prose-ready summary with numbers + p-values
   - by_split_tradeoff.csv      : accuracy/violation by split-kind x treatment
-  - assay_aware_gain.csv       : satisficing_assay vs satisficing (the novelty)
 
 Honest: every claim carries its n (endpoints), and criteria not evaluable from
 available results are marked 'not_evaluable' rather than assumed pass.
@@ -25,7 +23,7 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src" / "censoradmet"))
 
 import numpy as np
 import pandas as pd
@@ -105,45 +103,6 @@ def main():
                     mono = all(vals[i] <= vals[i + 1] + 0.03 for i in range(len(vals) - 1))
                     criteria[f"pareto_monotone_{tag}_{sk}"] = {
                         "pass": bool(mono), "eps_order": order, "violations": [round(v, 3) for v in vals]}
-
-        # ---------- assay-aware + transfer gains (measurement and broadened ADMET) ----------
-        if tag in ("measurement", "admet") and "satisficing_assay@0.05" in set(agg.treatment_label):
-            gains = []
-            comparisons = [("satisficing_assay@0.05", "satisficing@0.05", "assay_vs_satisf")]
-            if "satisficing_transfer@0.05" in set(agg.treatment_label):
-                comparisons += [
-                    ("satisficing_transfer@0.05", "satisficing@0.05", "transfer_vs_satisf"),
-                    ("satisficing_transfer@0.05", "satisficing_assay@0.05", "transfer_vs_assay"),
-                    ("satisficing_transfer@0.05", "exact_only", "transfer_vs_exact"),
-                ]
-            for a, b, label in comparisons:
-                for sk in splits:
-                    for metric in ["acc_mae", "viol_violation_rate", "dec_false_safe_rate"]:
-                        r = A.paired_comparison(agg, metric, a, b, sk)
-                        if "p_value" in r:
-                            gains.append({"comparison": label, "metric": metric, **r})
-            gdf = pd.DataFrame(gains)
-            gdf.to_csv(out / f"assay_transfer_gain_{tag}.csv", index=False)
-            # guard: with too few endpoints (e.g. broadened ADMET set) paired tests
-            # may yield no rows, so the df lacks the 'comparison' column.
-            if "comparison" not in gdf.columns:
-                continue
-            # CRITERION: assay-aware helps most under ASSAY shift
-            am = gdf[(gdf.comparison == "assay_vs_satisf") & (gdf.split_kind == "assay") & (gdf.metric == "acc_mae")]
-            if len(am):
-                row = am.iloc[0]
-                criteria[f"assay_aware_improves_mae_under_assay_shift_{tag}"] = {
-                    "pass": bool(row["median_delta"] < 0 and row["p_value"] < 0.1),
-                    "median_delta_mae": round(float(row["median_delta"]), 4),
-                    "p_value": round(float(row["p_value"]), 4), "n_endpoints": int(row["n_endpoints"])}
-            # CRITERION: transfer improves MAE under SOURCE shift (the old weak spot)
-            tm = gdf[(gdf.comparison == "transfer_vs_exact") & (gdf.split_kind == "source") & (gdf.metric == "acc_mae")]
-            if len(tm):
-                row = tm.iloc[0]
-                criteria[f"transfer_improves_mae_under_source_shift_{tag}"] = {
-                    "pass": bool(row["median_delta"] < 0 and row["p_value"] < 0.15),
-                    "median_delta_mae": round(float(row["median_delta"]), 4),
-                    "p_value": round(float(row["p_value"]), 4), "n_endpoints": int(row["n_endpoints"])}
 
     # ---------- hidden-truth recovery ----------
     ht = _concat_csvs(str(root / "hidden_truth" / "*.csv"))

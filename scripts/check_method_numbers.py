@@ -1,5 +1,4 @@
-"""Verify that the numbers reported in manuscript_v2/main_v2.qmd are reproducible
-from the frozen result artifacts in stage13_method/results/.
+"""Verify that the reported numerical claims are reproducible from frozen artifacts.
 
 This is the method-paper analogue of scripts/check_numerical_consistency.py: it
 recomputes a representative set of headline numbers in the manuscript from the
@@ -7,8 +6,8 @@ released parquet/CSV artifacts and asserts the recomputed value matches the valu
 asserted in CLAIMS below (which mirrors the manuscript). Any drift raises SystemExit, so a
 reviewer (or CI) can confirm the manuscript is backed by the released data.
 
-Run from the stage13_method directory:
-    python check_method_numbers.py
+Run from the repository root:
+    python scripts/check_method_numbers.py
 Exit 0 = all manuscript numbers reproduce; non-zero = a mismatch is reported.
 """
 from __future__ import annotations
@@ -26,7 +25,7 @@ ATOL = 0.01  # manuscript rounds to ~2-3 decimals; allow 0.01 absolute drift
 
 def _label(row):
     t = row["treatment"]
-    if t in ("satisficing", "satisficing_assay", "satisficing_transfer", "ensemble_satisficing"):
+    if t in ("satisficing", "ensemble_satisficing"):
         return f"{t}@{row['eps']:.2f}"
     return t
 
