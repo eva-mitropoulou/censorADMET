@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use CensorADMET, please cite the accompanying ChemRxiv publication."
-title: "CensorADMET: Constraint-Satisficing Regression for Censored ADMET Prediction with a Controllable Accuracy-versus-Consistency Trade-off"
+title: "CensorADMET: Controllable Constraint-Satisficing Regression for Censored ADMET Data"
 authors:
   - family-names: Mitropoulou
     given-names: Evangelia
@@ -10,7 +10,7 @@ date-released: 2026-07-14
 license: MIT
 preferred-citation:
   type: article
-  title: "CensorADMET: Constraint-Satisficing Regression for Censored ADMET Prediction with a Controllable Accuracy-versus-Consistency Trade-off"
+  title: "CensorADMET: Controllable Constraint-Satisficing Regression for Censored ADMET Data"
   authors:
     - family-names: Mitropoulou
       given-names: Evangelia

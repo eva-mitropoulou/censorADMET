@@ -2,7 +2,7 @@
 
 **CensorADMET** is an open, reproducible benchmark and method implementation for ADMET regression with inequality-labelled measurements. Instead of discarding assay statements such as `IC50 > 10 uM` or replacing them with point labels, it preserves them as interval constraints and makes the accuracy-versus-bound-consistency trade-off explicit.
 
-The accompanying ChemRxiv preprint introduces **constraint satisficing**: an augmented-Lagrangian objective that limits the aggregate probability deficit assigned to observed censored intervals while retaining an exact-label objective.
+The accompanying ChemRxiv publication introduces **constraint satisficing**: an augmented-Lagrangian objective that limits the aggregate probability deficit assigned to observed censored intervals while retaining an exact-label objective.
 
 ## Why This Matters
 
@@ -63,7 +63,7 @@ make verify
 
 Please cite the accompanying ChemRxiv publication:
 
-> Mitropoulou, E.; Giannopoulos, D. *CensorADMET: Constraint-Satisficing Regression for Censored ADMET Prediction with a Controllable Accuracy-versus-Consistency Trade-off.* ChemRxiv, 2026.
+> Mitropoulou, E.; Giannopoulos, D. *CensorADMET: Controllable Constraint-Satisficing Regression for Censored ADMET Data.* ChemRxiv, 2026.
 
 The stable ChemRxiv identifier will be added to [CITATION.cff](CITATION.cff) on publication.
 
