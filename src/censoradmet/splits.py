@@ -1,10 +1,10 @@
 """Distribution-shift splits (plan §9).
 
-Each split returns a list of (name, train_idx, test_idx) folds. All are GROUPED:
-a group (scaffold / assay / document / source / threshold band) is never split
-across train and test, so the test set genuinely probes generalisation to unseen
-chemistry / unseen assays / unseen labs / unseen protocols / unseen potency
-regimes -- the shifts that matter for prospective ADMET use.
+Each split returns a list of (name, train_idx, test_idx) folds. The random split
+is an IID row-wise reference. Scaffold, assay, document, source and threshold
+splits use their respective groups so that the grouped quantity is never split
+across train and test; they probe chemical, assay, provenance, or potency-regime
+shift rather than treating the random split as leakage-free chemistry evaluation.
 
 Leakage guard: for grouped splits we additionally assert that no group key
 appears in both train and test.
