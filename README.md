@@ -59,6 +59,7 @@ The checked manuscript summaries and source result matrices are already released
 
 - `results/matrix_endpoint/all_results.parquet` — aggregated endpoint cohort.
 - `results/matrix_measurement/all_results.parquet` — measurement-level cohort.
+- `results/matrix_admet/all_results.parquet` — broadened-property cohort.
 - `results/synthesis/` — endpoint-level summaries, paired comparisons, calibration, feasibility, and broadened-property summaries.
 - `figures/` — frozen Figure 1 and Figure 2 image artifacts.
 

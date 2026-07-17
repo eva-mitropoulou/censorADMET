@@ -18,6 +18,7 @@ DEFAULT_PATHS = [
     "configs/manuscript-v1.0.0.json",
     "results/matrix_endpoint/all_results.parquet",
     "results/matrix_measurement/all_results.parquet",
+    "results/matrix_admet/all_results.parquet",
     "results/synthesis",
 ]
 
