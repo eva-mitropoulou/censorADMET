@@ -1,6 +1,7 @@
 cff-version: 1.2.0
 message: "If you use CensorADMET, please cite this software release. The article DOI will be added after publication."
 title: "CensorADMET: Controllable Constraint-Satisficing Regression for Censored ADMET Data"
+doi: 10.5281/zenodo.21417709
 authors:
   - family-names: Mitropoulou
     given-names: Evangelia
@@ -16,6 +17,7 @@ preferred-citation:
   type: software
   title: "CensorADMET: Controllable Constraint-Satisficing Regression for Censored ADMET Data"
   version: 1.0.0
+  doi: 10.5281/zenodo.21417709
   authors:
     - family-names: Mitropoulou
       given-names: Evangelia

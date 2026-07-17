@@ -69,4 +69,4 @@ The checked manuscript summaries and source result matrices are already released
 
 Original code is [MIT licensed](LICENSE_CODE). Curated ChEMBL 36-derived inputs, fixed splits, and result artifacts are [CC BY-SA 3.0](LICENSE_DATA); retain the ChEMBL attribution in [ATTRIBUTION.md](ATTRIBUTION.md). See [LICENSES/README.md](LICENSES/README.md) for the file-level map.
 
-Please cite the software release using [CITATION.cff](CITATION.cff). The manuscript/preprint is a separate scholarly object; its DOI will be added after publication. ChEMBL 36 must also be cited (DOI: `10.6019/CHEMBL.database.36`).
+Please cite the archived software release, DOI: [10.5281/zenodo.21417709](https://doi.org/10.5281/zenodo.21417709), using [CITATION.cff](CITATION.cff). The manuscript/preprint is a separate scholarly object; its DOI will be added after publication. ChEMBL 36 must also be cited (DOI: `10.6019/CHEMBL.database.36`).
