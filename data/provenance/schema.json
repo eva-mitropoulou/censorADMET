@@ -1,0 +1,212 @@
+{
+  "allowed_values": {
+    "censoring_class": [
+      "exact",
+      "interval",
+      "left_censored_p",
+      "right_censored_p"
+    ],
+    "relation_p": [
+      "<",
+      "<=",
+      "=",
+      ">",
+      ">=",
+      "interval"
+    ]
+  },
+  "columns": [
+    {
+      "name": "row_id",
+      "nullable": false,
+      "semantic_meaning": "row_id"
+    },
+    {
+      "name": "endpoint_id",
+      "nullable": false,
+      "semantic_meaning": "endpoint_id"
+    },
+    {
+      "name": "target_key",
+      "nullable": true,
+      "semantic_meaning": "target_key"
+    },
+    {
+      "name": "target_chembl_id",
+      "nullable": true,
+      "semantic_meaning": "target_chembl_id"
+    },
+    {
+      "name": "standard_type",
+      "nullable": true,
+      "semantic_meaning": "standard_type"
+    },
+    {
+      "name": "assay_type",
+      "nullable": true,
+      "semantic_meaning": "assay_type"
+    },
+    {
+      "name": "parent_molecule_chembl_id",
+      "nullable": false,
+      "semantic_meaning": "parent_molecule_chembl_id"
+    },
+    {
+      "name": "representative_molecule_chembl_id",
+      "nullable": true,
+      "semantic_meaning": "representative_molecule_chembl_id"
+    },
+    {
+      "name": "compound_id",
+      "nullable": true,
+      "semantic_meaning": "compound_id"
+    },
+    {
+      "name": "smiles",
+      "nullable": true,
+      "semantic_meaning": "smiles"
+    },
+    {
+      "name": "standardized_smiles",
+      "nullable": false,
+      "semantic_meaning": "standardized_smiles"
+    },
+    {
+      "name": "standard_inchikey",
+      "nullable": true,
+      "semantic_meaning": "standard_inchikey"
+    },
+    {
+      "name": "connectivity_inchikey",
+      "nullable": true,
+      "semantic_meaning": "connectivity_inchikey"
+    },
+    {
+      "name": "murcko_scaffold_smiles",
+      "nullable": true,
+      "semantic_meaning": "murcko_scaffold_smiles"
+    },
+    {
+      "name": "relation_p",
+      "nullable": false,
+      "semantic_meaning": "relation_p"
+    },
+    {
+      "name": "value_p",
+      "nullable": true,
+      "semantic_meaning": "value_p"
+    },
+    {
+      "name": "lower_bound_p",
+      "nullable": false,
+      "semantic_meaning": "lower_bound_p"
+    },
+    {
+      "name": "upper_bound_p",
+      "nullable": false,
+      "semantic_meaning": "upper_bound_p"
+    },
+    {
+      "name": "lower_bound_is_infinite",
+      "nullable": true,
+      "semantic_meaning": "lower_bound_is_infinite"
+    },
+    {
+      "name": "upper_bound_is_infinite",
+      "nullable": true,
+      "semantic_meaning": "upper_bound_is_infinite"
+    },
+    {
+      "name": "censoring_class",
+      "nullable": false,
+      "semantic_meaning": "censoring_class"
+    },
+    {
+      "name": "n_measurements",
+      "nullable": true,
+      "semantic_meaning": "n_measurements"
+    },
+    {
+      "name": "n_exact",
+      "nullable": true,
+      "semantic_meaning": "n_exact"
+    },
+    {
+      "name": "n_left_censored_p",
+      "nullable": true,
+      "semantic_meaning": "n_left_censored_p"
+    },
+    {
+      "name": "n_right_censored_p",
+      "nullable": true,
+      "semantic_meaning": "n_right_censored_p"
+    },
+    {
+      "name": "n_assays",
+      "nullable": true,
+      "semantic_meaning": "n_assays"
+    },
+    {
+      "name": "n_documents",
+      "nullable": true,
+      "semantic_meaning": "n_documents"
+    },
+    {
+      "name": "assay_chembl_ids",
+      "nullable": true,
+      "semantic_meaning": "assay_chembl_ids"
+    },
+    {
+      "name": "document_chembl_ids",
+      "nullable": true,
+      "semantic_meaning": "document_chembl_ids"
+    },
+    {
+      "name": "min_document_year",
+      "nullable": true,
+      "semantic_meaning": "min_document_year"
+    },
+    {
+      "name": "max_document_year",
+      "nullable": true,
+      "semantic_meaning": "max_document_year"
+    },
+    {
+      "name": "quality_flag",
+      "nullable": true,
+      "semantic_meaning": "quality_flag"
+    },
+    {
+      "name": "split_group_parent_id",
+      "nullable": true,
+      "semantic_meaning": "split_group_parent_id"
+    },
+    {
+      "name": "split_group_inchikey",
+      "nullable": true,
+      "semantic_meaning": "split_group_inchikey"
+    },
+    {
+      "name": "split_group_connectivity_inchikey",
+      "nullable": true,
+      "semantic_meaning": "split_group_connectivity_inchikey"
+    },
+    {
+      "name": "split_group_scaffold",
+      "nullable": true,
+      "semantic_meaning": "split_group_scaffold"
+    },
+    {
+      "name": "split_group_year",
+      "nullable": true,
+      "semantic_meaning": "split_group_year"
+    },
+    {
+      "name": "split_group_ids_available",
+      "nullable": false,
+      "semantic_meaning": "split_group_ids_available"
+    }
+  ],
+  "name": "CensorADMET endpoint schema",
+  "version": "1.0.0"
+}

@@ -1,0 +1,2 @@
+total_records,valid_rdkit,invalid_rdkit,parent_smiles_used,child_smiles_used,standardized_changed_smiles,missing_scaffold,rejected_mixture,rejected_too_large,rejected_too_small
+182743,181160,1583,181649,0,392,4364,0,324,99

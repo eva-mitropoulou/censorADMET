@@ -1,0 +1,24 @@
+{
+  "chembl_release": "CHEMBL36",
+  "chembl_release_doi": "10.6019/CHEMBL.database.36",
+  "environment_summary": {
+    "packages": {
+      "pandas": "3.0.2",
+      "pyarrow": "24.0.0",
+      "rdkit": "2026.03.3"
+    },
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3 (main, Mar  3 2026, 12:15:18) [GCC 13.3.0]"
+  },
+  "generation_command": "python stage4/src/build_benchmark_package.py --stage3-dir stage3 --outdir CensorADMET-v1 --version 1.0.0",
+  "git_commit": "9a1c2e8fc6e93513a0b66dfb82bc50ea8db7ad6d",
+  "stage2_input_files": [
+    "stage2/data/raw_candidate_records.parquet",
+    "stage2/data/clean_candidate_records.parquet"
+  ],
+  "stage3_curation_rules_hash": "0107c8bd0e9359d9c2804eebca45324cd4e00cd5ec5c2f4db1504693a73375b1",
+  "stage3_input_files": [
+    "stage3/data/processed/v1_strict/*.parquet"
+  ],
+  "stage4_package_script_hash": "6624fbf45ecb1d161180baab77f4803945efc244ff0e0c66be9ff82a92bc2cd9"
+}
