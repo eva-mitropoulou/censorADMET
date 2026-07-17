@@ -1,72 +1,71 @@
 # CensorADMET
 
-**CensorADMET** is an open, reproducible benchmark and method implementation for ADMET regression with inequality-labelled measurements. Instead of discarding assay statements such as `IC50 > 10 uM` or replacing them with point labels, it preserves them as interval constraints and makes the accuracy-versus-bound-consistency trade-off explicit.
+CensorADMET is research software for regression with censored ADMET measurements. It preserves inequality labels such as `IC50 > 10 µM` as probability constraints and provides an explicit accuracy-versus-bound-consistency operating budget.
 
-The accompanying ChemRxiv publication introduces **constraint satisficing**: an augmented-Lagrangian objective that limits the aggregate probability deficit assigned to observed censored intervals while retaining an exact-label objective.
+This `v1.0.0-paper` release freezes the code and artifacts used to audit the accompanying manuscript. It excludes the manuscript itself, model checkpoints, raw ChEMBL database dumps, caches, and internal working material.
 
-## Why This Matters
-
-Public ADMET data contain assay bounds as well as exact values. Common handling rules either throw away this information or treat a threshold as the unknown truth. CensorADMET evaluates these choices directly under chemical and provenance shift.
-
-The central result is deliberately not a leaderboard claim. Plain interval likelihood substantially reduces one-sided violations of known bounds, but can incur large exact-label penalties. Constraint satisficing exposes a prespecified operating curve between these objectives.
-
-## Included Results
-
-The frozen result artifacts cover eight CYP, hERG, and ABCB1 measurement-level endpoints from ChEMBL 36, with random, scaffold, assay-held-out, document-held-out, and source-held-out evaluation.
-
-| Finding | Result |
-|---|---:|
-| Primary satisficing violation reduction versus exact-only | 0.15--0.29 median endpoint-level reduction |
-| Primary satisficing exact-label MAE cost | <= 0.04 transformed-scale units median |
-| Plain Tobit bound-consistency gain | Larger, with substantially higher exact-label MAE in matched comparisons |
-| Matched soft-deficit comparator | Similar operating points can be obtained with a scalar penalty; the distinct contribution is direct deficit-budget control |
-| Complete feasibility audit | 40 endpoint/split assignments and 370 fold-and-seed cells; aggregate budget targeting is reported rather than claimed as per-run enforcement |
-| Split-conformal intervals | Coverage 0.79--0.90; mean widths 3.59--4.83 and median widths 3.27--3.48 transformed-scale units |
-
-`figures/` contains the two core operating-curve and endpoint-effect plots. `results/` contains the tidy per-run matrices and compact summaries used for the reported analyses.
-
-## Repository Layout
+## Repository layout
 
 ```text
-src/censoradmet/   constraint loss, augmented-Lagrangian trainer, models, splits, metrics
-scripts/           reproducible experiment and validation entry points
-data/              frozen ChEMBL-36 measurement-level benchmark input
-results/           frozen result matrices and manuscript-value summaries
-figures/           main operating-curve and paired-effect figures
-tests/             unit tests for interval handling, losses, splits, and metrics
+src/censoradmet/     model, constrained objective, data loaders, splits, metrics
+data/                curated ChEMBL 36-derived inputs and fixed split archives
+configs/             frozen manuscript experiment configuration
+results/             per-run result matrices and aggregated manuscript summaries
+scripts/             validation, fixed-split export, and analysis/figure runners
+figures/             frozen manuscript figures
+tests/               automated unit and leakage-oriented tests
+LICENSES/            licence map and third-party attribution information
 ```
 
-The repository intentionally excludes manuscript files, internal project logs, review material, model checkpoints, and intermediate workspace artifacts.
+`data/measurement_records.parquet` is the measurement-level cohort. `data/endpoints/` contains the ten aggregated endpoint inputs, and `data/admet_endpoints/` contains the three broadened-property inputs. `data/fixed_splits/` holds compressed train/test index assignments for the frozen five-fold, split-seed-zero design.
 
 ## Install
 
-Python 3.11+ and RDKit are required. A conda environment is the most reliable way to install RDKit.
+Python 3.11+ and RDKit are required for chemistry-dependent work. A conda environment is the most reliable installation route.
 
 ```bash
 conda create -n censoradmet python=3.11 rdkit -c conda-forge
 conda activate censoradmet
-pip install -e .
+pip install -e '.[test,chemistry]'
 ```
 
-## Reproduce And Verify
+## Quick checks and verification
 
-The repository ships the frozen input and result artifacts needed to audit the reported analyses without retraining.
+Run the tests and reconstruct representative manuscript values from the frozen artifacts:
 
 ```bash
 make test
 make verify
+make validate-splits
 ```
 
-`make verify` recomputes representative manuscript values from the released result files. The conformal audit uses exact calibration rows only and records the fixed calibration/test sample sizes for every endpoint, split, fold, and seed. Full experiment drivers are in `scripts/`; they use the fixed data, split generator, seeds, and hyperparameters distributed here.
+`scripts/check_method_numbers.py` verifies 74 representative values against the released result files, with a tolerance of 0.01. `make validate-splits` verifies every archived fold has in-range, non-overlapping train/test indices. `scripts/export_fixed_splits.py` regenerates the compact split archives from `configs/manuscript-v1.0.0.json`; it performs no model fitting.
 
-## Citation
+To inspect a small deterministic example without training a model:
 
-Please cite the accompanying ChemRxiv publication:
+```bash
+PYTHONPATH=src/censoradmet python - <<'PY'
+from data import load_measurement_endpoint
+from splits import make_splits
+ds = load_measurement_endpoint('hERG', 'IC50')
+name, train, test = make_splits(ds, kinds=('scaffold',), k=5, seed=0)['scaffold'][0]
+print(ds.endpoint_id, ds.n, name, len(train), len(test))
+PY
+```
 
-> Mitropoulou, E.; Giannopoulos, D. *CensorADMET: Controllable Constraint-Satisficing Regression for Censored ADMET Data.* ChemRxiv, 2026.
+## Reconstructing reported outputs
 
-The stable ChemRxiv identifier will be added to [CITATION.cff](CITATION.cff) on publication.
+The checked manuscript summaries and source result matrices are already released:
 
-## Licenses And Attribution
+- `results/matrix_endpoint/all_results.parquet` — aggregated endpoint cohort.
+- `results/matrix_measurement/all_results.parquet` — measurement-level cohort.
+- `results/synthesis/` — endpoint-level summaries, paired comparisons, calibration, feasibility, and broadened-property summaries.
+- `figures/` — frozen Figure 1 and Figure 2 image artifacts.
 
-The code is released under the [MIT License](LICENSE_CODE). The curated benchmark input is a ChEMBL 36-derived adaptation and is released separately under [CC BY-SA 3.0](LICENSE_DATA), consistent with ChEMBL's data license. See [ATTRIBUTION.md](ATTRIBUTION.md) and [data/README.md](data/README.md) for required attribution and reuse terms.
+`scripts/synthesize_results.py` rebuilds summary files from these existing artifacts. Full retraining uses `scripts/run_matrix.py` and the settings in `configs/manuscript-v1.0.0.json`; it is computationally expensive and is not part of the release validation workflow.
+
+## Licence and citation
+
+Original code is [MIT licensed](LICENSE_CODE). Curated ChEMBL 36-derived inputs, fixed splits, and result artifacts are [CC BY-SA 3.0](LICENSE_DATA); retain the ChEMBL attribution in [ATTRIBUTION.md](ATTRIBUTION.md). See [LICENSES/README.md](LICENSES/README.md) for the file-level map.
+
+Please cite the software release using [CITATION.cff](CITATION.cff). The manuscript/preprint is a separate scholarly object; its DOI will be added after publication. ChEMBL 36 must also be cited (DOI: `10.6019/CHEMBL.database.36`).

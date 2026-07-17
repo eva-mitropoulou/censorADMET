@@ -4,12 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "censoradmet"
-version = "0.1.0"
+version = "1.0.0"
 description = "Constraint-satisficing regression for censored ADMET data."
 readme = "README.md"
 requires-python = ">=3.11"
 license = {text = "MIT"}
-authors = [{name = "Evangelia Mitropoulou"}]
+authors = [
+  {name = "Evangelia Mitropoulou"},
+  {name = "Dimitris Giannopoulos"},
+]
 dependencies = [
   "numpy>=1.26",
   "pandas>=2.1",
